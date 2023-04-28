@@ -2,74 +2,78 @@
 #define HEADER_H
 
 #include <stdio.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include <sys/wait.h>
-#include <sys/types.h>
 #include <errno.h>
-#include <stddef.h>
+#include <stdlib.h>
 #include <sys/stat.h>
+#include <dirent.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
 #include <signal.h>
 
-/**
- * struct list_path - Linked list containing PATH directories
- * @dir: directory in path
- * @p: pointer to next node
- */
-typedef struct list_path
-{
-	char *dir;
-	struct list_path *p;
-} list_path;
+#define min(x, y) (((x) < (y)) ? (x) : (y))
 
-/**
- * struct mybuild - pointer to function with corresponding buildin command
- * @name: buildin command
- * @func: execute the buildin command
- */
-typedef struct mybuild
-{
-	char *name;
-	void (*func)(char **);
-} mybuild;
-
-/*Shell starting function*/
-void _isatty(void);
-void HANDLE_END_OF_FILE(int len, char *buff);
-void sign_handler(int sig_num);
-
-/* string_handler.c */
-int _putchar(char c);
-void _puts(char *str);
-int _strlen(char *s);
-char *_strdup(char *str);
-char *concat_all(char *name, char *sep, char *value);
-
-/* line_exec_handler.c */
-char **split_string(char *str, const char *delim);
-void execute(char **argv);
-void *_realloc(void *ptr, unsigned int old_size, unsigned int new_size);
-void freearv(char **arv);
-
-/* linkpath_handler.c */
-char *_getenv(const char *name);
-list_path *add_node_end(list_path **head, char *str);
-list_path *linkpath(char *path);
-char *_which(char *filename, list_path *head);
-void free_list(list_path *head);
-
-/* checkbuild_handler.c */
-void(*checkbuild(char **arv))(char **arv);
-
-/* buildin_handler.c */
-void exit_shell(char **args);
-int _atoi(const char *s);
-void env(char **arv);
-void _setenv(char **arv);
-void _unsetenv(char **arv);
+/*constants*/
+#define INVALID_COMMAND -1
+#define EXTERNAL_COMMAND 1
+#define PATH_COMMAND 3
+#define INTERNAL_COMMAND 2
 
 extern char **environ;
+extern char *line;
+extern char **commands;
+extern char *shell_name;
+extern int status;
 
-#endif
+/**
+ *struct map - a struct that maps a command name to a function 
+ *
+ *@command_name: name of the command
+ *@func: the function that executes the command
+ */
+typedef struct map
+{
+	char *command_name;
+	void (*func)(char **command);
+} function_map;
+
+/*tokenizer.c*/
+char **tokenizer(char *, char *);
+void print(char *, int);
+void remove_newline(char *);
+int _strlen(char *);
+void _strcpy(char *, char *);
+
+/*string.c*/
+int _strcmp(char *, char *);
+char *_strcat(char *, char *);
+int _strspn(char *, char *);
+int _strcspn(char *, char *);
+char *_strchr(char *, char);
+
+/*sllocate_memory.c*/
+char *_strtok_r(char *, char *, char **);
+int _atoi(char *);
+void *_realloc(void *ptr, unsigned int old_size, unsigned int new_size);
+void ctrl_c_handler(int);
+void remove_comment(char *);
+
+/*utils.c*/
+int parse_command(char *);
+void execute_command(char **, int);
+char *check_path(char *);
+void (*get_func(char *))(char **);
+char *_getenv(char *);
+
+/*built_in.c*/
+void env(char **);
+void quit(char **);
+
+/*main*/
+extern void non_interactive(void);
+extern void initializer(char **current_command, int type_command);
+
+#endif /*SHELL_H*/
+
+

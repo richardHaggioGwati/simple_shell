@@ -1,52 +1,63 @@
 #include "header.h"
+
+
+	char **commands = NULL;
+	char *line = NULL;
+	char *shell_name = NULL;
+	int status = 0;
+
 /**
- * main - Shell
+ * main - the main shell code
+ * @argc: number of arguments passed
+ * @argv: program arguments to be parsed
+ *
+ * applies the functions in utils and helpers
+ * implements EOF
+ * Prints error on Failure
  * Return: 0 on success
  */
-int main(void)
-{
-ssize_t line_len = 0;
-char *line_buf = NULL, *env_value, *pathname, **args;
-size_t buf_size = 0;
-list_path *path_list = '\0';
-void (*cmd_func)(char **);
 
-signal(SIGINT, sign_handler);
-while (line_len != EOF)
+
+int main(int argc __attribute__((unused)), char **argv)
 {
-_isatty();
-line_len = getline(&line_buf, &buf_size, stdin);
-HANDLE_END_OF_FILE(line_len, line_buf);
-args = split_string(line_buf, " \n");
-if (!args || !args[0])
-{
-execute(args);
+    char **current_command = NULL;
+    int type_command = 0, i;
+    size_t n = 0;
+
+    signal(SIGINT, ctrl_c_handler);
+    shell_name = argv[0];
+    while (1)
+    {
+        non_interactive();
+        print("($) ", STDOUT_FILENO);
+        if (getline(&line, &n, stdin) == -1)
+        {
+            free(line);
+            exit(status);
+        }
+
+        remove_newline(line);
+        remove_comment(line);
+        commands = tokenizer(line, ";");
+
+        for (i = 0; commands[i] != NULL; i++)
+        {
+            current_command = tokenizer(commands[i], " ");
+            if (current_command[0] == NULL)
+            {
+                free(current_command);
+                break;
+            }
+            type_command = parse_command(current_command[0]);
+
+            initializer(current_command, type_command);
+            free(current_command);
+        }
+
+        free(commands);
+    }
+
+    free(line);
+    return status;
 }
-else
-{
-env_value = _getenv("PATH");
-path_list = linkpath(env_value);
-pathname = _which(args[0], path_list);
-cmd_func = checkbuild(args);
-if (cmd_func != NULL)
-{
-free(line_buf);
-line_buf = NULL;
-cmd_func(args);
-}
-else if (!pathname)
-execute(args);
-else if (pathname)
-{
-free(args[0]);
-args[0] = pathname;
-execute(args);
-}
-}
-}
-free_list(path_list);
-freearv(args);
-free(line_buf);
-free(line_len)
-return (0);
-}
+	
