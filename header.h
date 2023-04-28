@@ -35,6 +35,10 @@ typedef struct mybuild
 	void (*func)(char **);
 } mybuild;
 
+/*Shell starting function*/
+void _isatty(void);
+void HANDLE_END_OF_FILE(int len, char *buff);
+void sign_handler(int sig_num);
 
 /* string_handler.c */
 int _putchar(char c);

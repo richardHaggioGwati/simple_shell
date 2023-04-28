@@ -17,7 +17,7 @@ int i, j;
 * It contains the name of the command and a pointer to the function
 * that executes the command.
 */
-struct
+struct builtins
 {
 char *name;
 void (*func)(char **args);
