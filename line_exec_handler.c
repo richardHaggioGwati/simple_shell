@@ -12,16 +12,21 @@ int wn = 0;
 char **array = NULL;
 char *p = str;
 char *start;
+int i;
 
 while (*p)
 {
 while (*p && strchr(delim, *p))
+{
 p++;
+}
 if (*p)
 {
 start = p;
 while (*p && !strchr(delim, *p))
+{
 p++;
+}
 *p = '\0';
 array = realloc(array, sizeof(char *) * (wn + 1));
 if (array == NULL)
@@ -46,7 +51,14 @@ perror(_getenv("_"));
 return (NULL);
 }
 array[wn] = NULL;
-return (array);
+/* Free all memory allocated by the function */
+for (i = 0; i < wn; i++) {
+{
+free(array[i]);
+}
+}
+free(array);
+return (NULL);
 }
 
 /**
