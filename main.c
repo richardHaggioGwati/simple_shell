@@ -1,51 +1,48 @@
 #include "header.h"
-
 /**
- * main - entry point
- * @ac: arg count
- * @av: arg vector
- *
- * Return: 0 on success, 1 on error
+ * main - Shell
+ * Return: 0 on success
  */
-int main(int ac, char **av)
+int main(void)
 {
-    info_t info[] = { INFO_INIT };
-    int fd = 2;
+ssize_t len = 0;
+	char *buff = NULL, *value, *pathname, **arv;
+	size_t size = 0;
+	list_path *head = '\0';
+	void (*f)(char **);
 
-    asm ("mov %1, %0\n\t"
-        "add $3, %0"
-        : "=r" (fd)
-        : "r" (fd));
-
-    switch (ac)
-    {
-        case 2:
-            fd = open(av[1], O_RDONLY);
-            if (fd == -1)
-            {
-                switch (errno)
-                {
-                    case EACCES:
-                        exit(126);
-                    case ENOENT:
-                        _eputs(av[0]);
-                        _eputs(": 0: Can't open ");
-                        _eputs(av[1]);
-                        _eputchar('\n');
-                        _eputchar(BUF_FLUSH);
-                        exit(127);
-                    default:
-                        return (EXIT_FAILURE);
-                }
-            }
-            info->readfd = fd;
-            break;
-
-        default:
-            break;
-    }
-    populate_env_list(info);
-    read_history(info);
-    hsh(info, av);
-    return (EXIT_SUCCESS);
+	signal(SIGINT, sign_handler);
+	while (len != EOF)
+	{
+		_isatty();
+		len = getline(&buff, &size, stdin);
+		HANDLE_END_OF_FILE(len, buff);
+		arv = split_string(buff, " \n");
+		if (!arv || !arv[0])
+			execute(arv);
+		else
+		{
+			value = _getenv("PATH");
+			head = linkpath(value);
+			pathname = _which(arv[0], head);
+			f = checkbuild(arv);
+			if (f)
+			{
+				free(buff);
+				f(arv);
+			}
+			else if (!pathname)
+				execute(arv);
+			else if (pathname)
+			{
+				free(arv[0]);
+				arv[0] = pathname;
+				execute(arv);
+			}
+		}
+	}
+	free_list(head);
+	freearv(arv);
+	free(buff);
+	return (0);
 }
