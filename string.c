@@ -1,100 +1,75 @@
 #include "header.h"
 
 /**
- *_strcmp - compare two strings
- *@first: first string to be compared
- *@second: second string to be compared
+ * _strlen - returns the length of a string
+ * @s: the string whose length to check
  *
- * Return: difference of the two strings
+ * Return: integer length of string
  */
-int _strcmp(char *first, char *second)
+int _strlen(char *s)
 {
 	int i = 0;
 
-	while (first[i] != '\0')
-	{
-		if (first[i] != second[i])
-			break;
+	if (!s)
+		return (0);
+
+	while (*s++)
 		i++;
-	}
-	return (first[i] - second[i]);
+	return (i);
 }
 
 /**
- *_strcat - concatenates two strings
- *@destination: string to be concatenated to
- *@source:  string to concatenate
+ * _strcmp - performs lexicogarphic comparison of two strangs.
+ * @s1: the first strang
+ * @s2: the second strang
  *
- * Return: address of the new string
+ * Return: negative if s1 < s2, positive if s1 > s2, zero if s1 == s2
  */
-char *_strcat(char *destination, char *source)
+int _strcmp(char *s1, char *s2)
 {
-	char *new_string =  NULL;
-	int len_dest = _strlen(destination);
-	int len_source = _strlen(source);
-
-	new_string = malloc(sizeof(*new_string) * (len_dest + len_source + 1));
-	_strcpy(destination, new_string);
-	_strcpy(source, new_string + len_dest);
-	new_string[len_dest + len_source] = '\0';
-	return (new_string);
-}
-
-/**
- *_strspn - gets the length of a prefix substring
- *@str1: string to be searched
- *@str2: string to be used
- *
- *Return: number of bytes in the initial segment of 5 which are part of accept
- */
-int _strspn(char *str1, char *str2)
-{
-    int i = 0;
-    int match = 0;
-
-    while (str1[i] != '\0' && str2[i] != '\0' && str1[i] == str2[i])
-    {
-        match++;
-        i++;
-    }
-
-    return (match);
-}
-
-/**
- *_strcspn - computes segment of str1 which consists of characters not in str2
- *@str1: string to be searched
- *@str2: string to be used
- *
- *Return: index at which a char in str1 exists in str2
- */
-int _strcspn(char *str1, char *str2)
-{
-    int i = 0;
-    int match = 0;
-
-    while (str1[i] != '\0' && str2[i] != '\0' && str1[i] == str2[i])
-    {
-        match++;
-        i++;
-    }
-    return (match);
-}
-
-/**
- *_strchr - locates a char in a string
- *@s: string to be searched
- *@c: char to be checked
- *
- *Return: pointer to the first occurence of c in s
- */
-char *_strchr(char *s, char c)
-{
-	while (*s != '\0')
+	while (*s1 && *s2)
 	{
-		if (*s == c)
-			return (s);
-		s++;
+		if (*s1 != *s2)
+			return (*s1 - *s2);
+		s1++;
+		s2++;
 	}
-	return (NULL);
+	if (*s1 == *s2)
+		return (0);
+	else
+		return (*s1 < *s2 ? -1 : 1);
+}
+
+/**
+ * starts_with - checks if needle starts with haystack
+ * @haystack: string to search
+ * @needle: the substring to find
+ *
+ * Return: address of next char of haystack or NULL
+ */
+char *starts_with(const char *haystack, const char *needle)
+{
+	while (*needle)
+		if (*needle++ != *haystack++)
+			return (NULL);
+	return ((char *)haystack);
+}
+
+/**
+ * _strcat - concatenates two strings
+ * @dest: the destination buffer
+ * @src: the source buffer
+ *
+ * Return: pointer to destination buffer
+ */
+char *_strcat(char *dest, char *src)
+{
+	char *ret = dest;
+
+	while (*dest)
+		dest++;
+	while (*src)
+		*dest++ = *src++;
+	*dest = *src;
+	return (ret);
 }

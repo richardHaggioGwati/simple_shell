@@ -1,102 +1,94 @@
 #include "header.h"
 
 /**
- * tokenizer - tokenizes input and stores it into an array
- *@input_string: input to be parsed
- *@delim: delimiter to be used, needs to be one character string
- *
- *Return: array of tokens
+ * **strtow - splits a string into words. Repeat delimiters are ignored
+ * @str: the input string
+ * @d: the delimeter string
+ * Return: a pointer to an array of strings, or NULL on failure
  */
 
-char **tokenizer(char *input_string, char *delim)
+char **strtow(char *str, char *d)
 {
-    char **tokens = NULL;
-    char *token = NULL;
-    char *tmp = input_string;
-    int num_tokens = 0;
+	int i, j, k, m, numwords = 0;
+	char **s;
 
-    while ((token = strsep(&tmp, delim)) != NULL)
-    {
-        if (*token != '\0')
-        {
-            tokens = _realloc(tokens, sizeof(*tokens) * num_tokens,
-                              sizeof(*tokens) * (num_tokens + 1));
-            tokens[num_tokens++] = token;
-        }
-    }
+	if (str == NULL || str[0] == 0)
+		return (NULL);
+	if (!d)
+		d = " ";
+	for (i = 0; str[i] != '\0'; i++)
+		if (!is_delim(str[i], d) && (is_delim(str[i + 1], d) || !str[i + 1]))
+			numwords++;
 
-    tokens = _realloc(tokens, sizeof(*tokens) * num_tokens,
-                      sizeof(*tokens) * (num_tokens + 1));
-    tokens[num_tokens] = NULL;
-
-    return (tokens);
-}
-
-/**
- *print - prints a string to stdout
- *@string: string to be printed
- *@stream: stream to print out to
- *
- *Return: void, return nothing
- */
-void print(char *string, int stream)
-{
-	int i = 0;
-
-	for (i = 0; string[i] != '\0'; i++)
-		write(stream, &string[i], 1);
-}
-
-/**
- *remove_newline - removes new line from a string
- *@str: string to be used
- *
- *
- *Return: void
- */
-
-void remove_newline(char *str)
-{
-    char *ptr = strchr(str, '\n');
-    if (ptr != NULL) {
-        *ptr = '\0';
-    }
-}
-
-/**
- *_strcpy - copies a string to another buffer
- *@source: source to copy from
- *@dest: destination to copy to
- *
- * Return: void
- */
-
-void _strcpy(char *source, char *dest)
-{
-	int i = 0;
-
-	for (; source[i] != '\0'; i++)
+	if (numwords == 0)
+		return (NULL);
+	s = malloc((1 + numwords) * sizeof(char *));
+	if (!s)
+		return (NULL);
+	for (i = 0, j = 0; j < numwords; j++)
 	{
-		dest[i] = source[i];
+		while (is_delim(str[i], d))
+			i++;
+		k = 0;
+		while (!is_delim(str[i + k], d) && str[i + k])
+			k++;
+		s[j] = malloc((k + 1) * sizeof(char));
+		if (!s[j])
+		{
+			for (k = 0; k < j; k++)
+				free(s[k]);
+			free(s);
+			return (NULL);
+		}
+		for (m = 0; m < k; m++)
+			s[j][m] = str[i++];
+		s[j][m] = 0;
 	}
-	dest[i] = '\0';
+	s[j] = NULL;
+	return (s);
 }
 
 /**
- *_strlen - counts string length
- *@string: string to be counted
- *
- * Return: length of the string
+ * **strtow2 - splits a string into words
+ * @str: the input string
+ * @d: the delimeter
+ * Return: a pointer to an array of strings, or NULL on failure
  */
-
-int _strlen(char *string)
+char **strtow2(char *str, char d)
 {
-    const char *end = string;
+	int i, j, k, m, numwords = 0;
+	char **s;
 
-    if (string == NULL)
-        return 0;
-    while (*end) {
-        end++;
-    }
-    return (size_t)(end - string);
+	if (str == NULL || str[0] == 0)
+		return (NULL);
+	for (i = 0; str[i] != '\0'; i++)
+		if ((str[i] != d && str[i + 1] == d) ||
+		    (str[i] != d && !str[i + 1]) || str[i + 1] == d)
+			numwords++;
+	if (numwords == 0)
+		return (NULL);
+	s = malloc((1 + numwords) * sizeof(char *));
+	if (!s)
+		return (NULL);
+	for (i = 0, j = 0; j < numwords; j++)
+	{
+		while (str[i] == d && str[i] != d)
+			i++;
+		k = 0;
+		while (str[i + k] != d && str[i + k] && str[i + k] != d)
+			k++;
+		s[j] = malloc((k + 1) * sizeof(char));
+		if (!s[j])
+		{
+			for (k = 0; k < j; k++)
+				free(s[k]);
+			free(s);
+			return (NULL);
+		}
+		for (m = 0; m < k; m++)
+			s[j][m] = str[i++];
+		s[j][m] = 0;
+	}
+	s[j] = NULL;
+	return (s);
 }
